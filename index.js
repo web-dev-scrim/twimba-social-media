@@ -14,10 +14,45 @@ document.addEventListener("click", function (e) {
     handleRetweetClick(e.target.dataset.retweet);
   } else if (e.target.dataset.reply) {
     handleReplyClick(e.target.dataset.reply);
+  } else if (e.target.dataset.replyBtn) {
+    handleTweetReplyClick(e.target.dataset.replyBtn);
+  } else if (e.target.dataset.delete) {
+    handleTweetDeleteClick(e.target.dataset.delete);
   } else if (e.target.id === "tweet-btn") {
     handleTweetBtnClick();
   }
 });
+
+function handleTweetDeleteClick(tweetId) {
+  const tweetIndex = tweetsData.findIndex(function (tweet) {
+    return tweet.uuid === tweetId;
+  });
+
+  if (tweetIndex > -1) {
+    tweetsData.splice(tweetIndex, 1);
+    render();
+  }
+}
+
+function handleTweetReplyClick(replyId) {
+  const replyInput = document.getElementById(`reply-input-${replyId}`);
+
+  if (replyInput.value) {
+    const targetTweetObj = tweetsData.filter(function (tweet) {
+      return tweet.uuid === replyId;
+    })[0];
+
+    targetTweetObj.replies.push({
+      handle: `@Scrimba`,
+      profilePic: `images/scrimbalogo.png`,
+      tweetText: replyInput.value,
+    });
+
+    render();
+    document.getElementById(`replies-${replyId}`).classList.toggle("hidden");
+    replyInput.value = "";
+  }
+}
 
 function handleLikeClick(tweetId) {
   const targetTweetObj = tweetsData.filter(function (tweet) {
@@ -54,11 +89,6 @@ function handleReplyClick(replyId) {
 function handleTweetBtnClick() {
   const tweetInput = document.getElementById("tweet-input");
 
-  /*
-Challenge:
-1. No empty tweets!
-2. Clear the textarea after tweeting!
-*/
   if (tweetInput.value) {
     tweetsData.unshift({
       handle: `@Scrimba`,
@@ -110,6 +140,19 @@ function getFeedHtml() {
       });
     }
 
+    repliesHtml += `
+<div class="tweet-reply">
+  <div class="tweet-inner">
+    <img src="images/scrimbalogo.png" class="profile-pic">
+    <div>
+      <p class="handle">@Scrimba</p>
+      <textarea rows="2" cols="10" placeholder="Tweet your reply" class="tweet-text" id="reply-input-${tweet.uuid}"></textarea>
+      <button class="btn" data-reply-btn="${tweet.uuid}">Reply</button>
+    </div>
+  </div>
+</div>
+`;
+
     feedHtml += `
 <div class="tweet">
     <div class="tweet-inner">
@@ -135,6 +178,11 @@ function getFeedHtml() {
                     data-retweet="${tweet.uuid}"
                     ></i>
                     ${tweet.retweets}
+                </span>
+                <span class="tweet-detail">
+                    <i class="fa-solid fa-trash"
+                    data-delete="${tweet.uuid}"
+                    ></i>
                 </span>
             </div>   
         </div>            
