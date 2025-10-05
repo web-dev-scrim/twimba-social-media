@@ -1,11 +1,7 @@
 import { tweetsData } from "./data.js";
 import { v4 as uuidv4 } from "uuid";
 
-/*
-Challenge:
-3. We could improve index.js by moving one line
-   of code to a better position. Find it and move it!
-*/
+let storedTweets = JSON.parse(localStorage.getItem("feedData")) || tweetsData;
 
 document.addEventListener("click", function (e) {
   if (e.target.dataset.like) {
@@ -24,12 +20,12 @@ document.addEventListener("click", function (e) {
 });
 
 function handleTweetDeleteClick(tweetId) {
-  const tweetIndex = tweetsData.findIndex(function (tweet) {
+  const tweetIndex = storedTweets.findIndex(function (tweet) {
     return tweet.uuid === tweetId;
   });
 
   if (tweetIndex > -1) {
-    tweetsData.splice(tweetIndex, 1);
+    storedTweets.splice(tweetIndex, 1);
     render();
   }
 }
@@ -38,7 +34,7 @@ function handleTweetReplyClick(replyId) {
   const replyInput = document.getElementById(`reply-input-${replyId}`);
 
   if (replyInput.value) {
-    const targetTweetObj = tweetsData.filter(function (tweet) {
+    const targetTweetObj = storedTweets.filter(function (tweet) {
       return tweet.uuid === replyId;
     })[0];
 
@@ -55,7 +51,7 @@ function handleTweetReplyClick(replyId) {
 }
 
 function handleLikeClick(tweetId) {
-  const targetTweetObj = tweetsData.filter(function (tweet) {
+  const targetTweetObj = storedTweets.filter(function (tweet) {
     return tweet.uuid === tweetId;
   })[0];
 
@@ -69,7 +65,7 @@ function handleLikeClick(tweetId) {
 }
 
 function handleRetweetClick(tweetId) {
-  const targetTweetObj = tweetsData.filter(function (tweet) {
+  const targetTweetObj = storedTweets.filter(function (tweet) {
     return tweet.uuid === tweetId;
   })[0];
 
@@ -90,7 +86,7 @@ function handleTweetBtnClick() {
   const tweetInput = document.getElementById("tweet-input");
 
   if (tweetInput.value) {
-    tweetsData.unshift({
+    storedTweets.unshift({
       handle: `@Scrimba`,
       profilePic: `images/scrimbalogo.png`,
       likes: 0,
@@ -109,7 +105,7 @@ function handleTweetBtnClick() {
 function getFeedHtml() {
   let feedHtml = ``;
 
-  tweetsData.forEach(function (tweet) {
+  storedTweets.forEach(function (tweet) {
     let likeIconClass = "";
 
     if (tweet.isLiked) {
@@ -197,6 +193,7 @@ function getFeedHtml() {
 }
 
 function render() {
+  localStorage.setItem("feedData", JSON.stringify(storedTweets));
   document.getElementById("feed").innerHTML = getFeedHtml();
 }
 
